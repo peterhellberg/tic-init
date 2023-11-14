@@ -1,9 +1,15 @@
 # tic-init :sparkles:
 
-This is a command line tool for the [tic](https://github.com/peterhellberg/tic)
-Zig :zap: module, allowing you to create a directory with code that allows you
-to build a [WebAssembly](https://webassembly.org/) cart for the
-[TIC-80](https://tic80.com/) :tada:
+This is a command line tool that acts as a companion to my
+[tic](https://github.com/peterhellberg/tic) module
+for [Zig](https://ziglang.org/) :zap:,
+
+`tic-init` is used to create a directory containing code that
+allows you to promptly get started coding a cart for the
+fantasy console [TIC-80](https://tic80.com/).
+
+The Zig build target is declared as `.{ .cpu_arch = .wasm32, .os_tag = .wasi }`
+and optimize is set to `.ReleaseSmall` (So no need for `-Doptimize=ReleaseSmall`)
 
 ## Installation
 
@@ -20,6 +26,8 @@ tic-init mycart
 cd mycart
 zig build run
 ```
+
+:tada:
 
 > [!Note]
 > There is also a `zig build spy` command.
