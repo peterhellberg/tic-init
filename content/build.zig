@@ -29,7 +29,7 @@ pub fn build(b: *std.Build) !void {
     // Export symbols for use by TIC
     exe.export_symbol_names = &[_][]const u8{"TIC"};
 
-    // Run command that requires you to have a `tic80-pro` binary
+    // Run command that requires you to have a TIC-80 Pro binary
     const run_cmd = b.addSystemCommand(&[_][]const u8{
         "tic80-pro",
         "--skip",
