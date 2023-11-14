@@ -4,8 +4,8 @@
     .paths = .{""},
     .dependencies = .{
         .tic = .{
-            .url = "https://github.com/peterhellberg/tic/archive/refs/tags/v0.0.2.tar.gz",
-            .hash = "12206e1f4886b55200b1bed8cdaf13149986d0e71a2f4d90c429723debf9077dc32d",
+            .url = "https://github.com/peterhellberg/tic/archive/refs/tags/v0.0.3.tar.gz",
+            .hash = "1220741e9d23869b0b4ac5ac53124d99ac76bac232dc1fb4b38a7e45170c7ca90348",
         },
     },
 }
