@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"embed"
 	"flag"
 	"fmt"
@@ -11,6 +12,11 @@ import (
 //go:embed all:content
 var content embed.FS
 
+type config struct {
+	dir string
+	bin string
+}
+
 func main() {
 	if err := run(os.Args, os.Stdout); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
@@ -19,9 +25,20 @@ func main() {
 }
 
 func run(args []string, stdout io.Writer) error {
+	var cfg config
+
 	flags := flag.NewFlagSet(args[0], flag.ExitOnError)
 
-	// No flags for now
+	flags.Usage = func() {
+		format := "Usage: %s [OPTION]... DIRECTORY\n\nOptions:\n"
+
+		fmt.Fprintf(flags.Output(), format, os.Args[0])
+
+		flags.PrintDefaults()
+	}
+
+	flags.StringVar(&cfg.bin, "bin", "tic80-pro", "The name of the TIC-80 binary")
+
 	if err := flags.Parse(args[1:]); err != nil {
 		return err
 	}
@@ -33,20 +50,20 @@ func run(args []string, stdout io.Writer) error {
 		return fmt.Errorf("no name given as the first argument")
 	}
 
-	dir := rest[0]
+	cfg.dir = rest[0]
 
 	// Make sure that dir does not already exist
-	if _, err := os.Stat(dir); !os.IsNotExist(err) {
-		return fmt.Errorf("%q already exists", dir)
+	if _, err := os.Stat(cfg.dir); !os.IsNotExist(err) {
+		return fmt.Errorf("%q already exists", cfg.dir)
 	}
 
 	// Create the dir and dir/src
-	if err := os.MkdirAll(dir+"/src", os.ModePerm); err != nil {
+	if err := os.MkdirAll(cfg.dir+"/src", os.ModePerm); err != nil {
 		return err
 	}
 
 	// Enter the new directory
-	if err := os.Chdir(dir); err != nil {
+	if err := os.Chdir(cfg.dir); err != nil {
 		return err
 	}
 
@@ -57,7 +74,7 @@ func run(args []string, stdout io.Writer) error {
 
 	for _, e := range entries {
 		if !e.IsDir() {
-			if err := writeFile(e.Name()); err != nil {
+			if err := writeFile(cfg, e.Name(), replacer); err != nil {
 				return err
 			}
 
@@ -70,7 +87,7 @@ func run(args []string, stdout io.Writer) error {
 
 				for _, e := range srcEntries {
 					if !e.IsDir() {
-						if err := writeFile("src/" + e.Name()); err != nil {
+						if err := writeFile(cfg, "src/"+e.Name(), replacer); err != nil {
 							return err
 						}
 					}
@@ -82,11 +99,34 @@ func run(args []string, stdout io.Writer) error {
 	return nil
 }
 
-func writeFile(name string) error {
+func writeFile(cfg config, name string, dataFuncs ...dataFunc) error {
 	data, err := content.ReadFile("content/" + name)
 	if err != nil {
 		return fmt.Errorf("writeFile: %w", err)
 	}
 
+	for i := range dataFuncs {
+		data = dataFuncs[i](cfg, name, data)
+	}
+
 	return os.WriteFile(name, data, 0644)
+}
+
+type dataFunc func(config, string, []byte) []byte
+
+func replacer(cfg config, name string, data []byte) []byte {
+	switch name {
+	case "build.zig":
+		return replaceOne(data, "tic80-pro", cfg.bin)
+	case "build.zig.zon", "README.md":
+		return replaceOne(data, "tic80-zig-cart", cfg.dir)
+	case "cart.wasmp":
+		return replaceOne(data, "TIC-80 Zig Cart", cfg.dir)
+	default:
+		return data
+	}
+}
+
+func replaceOne(data []byte, old, new string) []byte {
+	return bytes.Replace(data, []byte(old), []byte(new), 1)
 }
