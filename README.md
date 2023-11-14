@@ -30,7 +30,7 @@ cd mycart
 zig build run
 ```
 
-:tada:
-
 > [!Note]
 > There is also a `zig build spy` command.
+
+:seedling:
