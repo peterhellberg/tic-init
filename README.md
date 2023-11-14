@@ -24,6 +24,10 @@ go install github.com/peterhellberg/tic-init@latest
 
 ## Usage
 
+(Requires you to have an up to date (nightly build) version of
+[Zig](https://ziglang.org/download/#release-master) installed,
+as well as the [PRO version](https://nesbox.itch.io/tic80) of TIC-80)
+
 ```sh
 tic-init mycart
 cd mycart
