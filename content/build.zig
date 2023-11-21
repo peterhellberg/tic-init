@@ -33,9 +33,10 @@ pub fn build(b: *std.Build) !void {
     const run_cmd = b.addSystemCommand(&[_][]const u8{
         "tic80-pro",
         "--skip",
-        "--fullscreen",
         "--fs",
         ".",
+        "--keepcmd",
+        "cart.wasmp",
         "--cmd",
         "load cart.wasmp &" ++
             " import binary zig-out/bin/cart.wasm &" ++
