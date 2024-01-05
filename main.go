@@ -7,14 +7,16 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 )
 
 //go:embed all:content
 var content embed.FS
 
 type config struct {
-	dir string
-	bin string
+	dir      string
+	bin      string
+	hostname string
 }
 
 func main() {
@@ -38,6 +40,7 @@ func run(args []string, stdout io.Writer) error {
 	}
 
 	flags.StringVar(&cfg.bin, "bin", "tic80-pro", "The name of the TIC-80 binary")
+	flags.StringVar(&cfg.hostname, "hostname", "peter.tilde.team", "Deploy to hostname using SSH/SCP")
 
 	if err := flags.Parse(args[1:]); err != nil {
 		return err
@@ -122,6 +125,9 @@ func replacer(cfg config, name string, data []byte) []byte {
 		return replaceOne(data, "tic80-zig-cart", cfg.dir)
 	case "cart.wasmp":
 		return replaceOne(data, "TIC-80 Zig Cart", cfg.dir)
+	case "Makefile":
+		data = replaceOne(data, "peter.tilde.team", cfg.hostname)
+		return replaceOne(data, "zig-cart", strings.Replace(cfg.dir, "tic80-", "", 1))
 	default:
 		return data
 	}
