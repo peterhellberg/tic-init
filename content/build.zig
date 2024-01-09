@@ -4,12 +4,18 @@ pub fn build(b: *std.Build) !void {
     const exe = b.addExecutable(.{
         .name = "cart",
         .root_source_file = .{ .path = "src/main.zig" },
-        .target = .{ .cpu_arch = .wasm32, .os_tag = .wasi },
+        .target = b.resolveTargetQuery(.{
+            .cpu_arch = .wasm32,
+            .os_tag = .wasi,
+        }),
         .optimize = .ReleaseSmall,
     });
 
     // Add the tic module to the executable
-    exe.addModule("tic", b.dependency("tic", .{}).module("tic"));
+    exe.root_module.addImport("tic", b.dependency("tic", .{}).module("tic"));
+
+    // Export symbols for use by TIC
+    exe.root_module.export_symbol_names = &[_][]const u8{"TIC"};
 
     // No entry point in the WASM
     exe.entry = .disabled;
@@ -25,9 +31,6 @@ pub fn build(b: *std.Build) !void {
     exe.initial_memory = memory;
     exe.max_memory = memory;
     exe.import_memory = true;
-
-    // Export symbols for use by TIC
-    exe.export_symbol_names = &[_][]const u8{"TIC"};
 
     // Run command that requires you to have a TIC-80 Pro binary
     const run_cmd = b.addSystemCommand(&[_][]const u8{
