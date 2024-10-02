@@ -1,4 +1,4 @@
 .local
-zig-cache
+.zig-cache
 zig-out
 cart.wasm
