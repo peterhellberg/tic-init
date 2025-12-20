@@ -3,12 +3,14 @@ const std = @import("std");
 pub fn build(b: *std.Build) !void {
     const exe = b.addExecutable(.{
         .name = "cart",
-        .root_source_file = b.path("src/main.zig"),
-        .target = b.resolveTargetQuery(.{
-            .cpu_arch = .wasm32,
-            .os_tag = .wasi,
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/main.zig"),
+            .target = b.resolveTargetQuery(.{
+                .cpu_arch = .wasm32,
+                .os_tag = .wasi,
+            }),
+            .optimize = .ReleaseSmall,
         }),
-        .optimize = .ReleaseSmall,
     });
 
     // Add the tic module to the executable
